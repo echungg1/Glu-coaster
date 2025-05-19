@@ -3,9 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glu-coaster</title>
+    <title>Glu-coaster: An Interactive Journey Through Glucose Management</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Glu-coaster</h1>
+    <div class="container">
+        <div id="story" class="section">
+            <h1>Glu-coaster: An Interactive Journey Through Glucose Management</h1>
+            <p>Meet Jack and Jill, two individuals with different lifestyles and dietary habits. Through their stories, we'll explore how different meals affect glucose levels and learn about proper nutrition management.</p>
+        </div>
+
+        <div id="character-selection" class="section">
+            <h2>Choose Your Character</h2>
+            <div class="character-cards">
+                <div class="character-card" data-character="jack">
+                    <h3>Jack</h3>
+                    <p>Age: 35</p>
+                    <p>Occupation: Software Engineer</p>
+                    <p>Lifestyle: Sedentary, works long hours</p>
+                </div>
+                <div class="character-card" data-character="jill">
+                    <h3>Jill</h3>
+                    <p>Age: 28</p>
+                    <p>Occupation: Fitness Instructor</p>
+                    <p>Lifestyle: Active, regular exercise</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="meal-section" class="section hidden">
+            <h2>Select a Meal</h2>
+            <select id="meal-dropdown">
+                <option value="">Choose a meal...</option>
+            </select>
+            <button id="add-to-cart">Add to Cart</button>
+        </div>
+
+        <div id="nutrition-chart" class="section hidden">
+            <h2>Nutrition Information</h2>
+            <div id="nutrition-bars"></div>
+            <button id="glucose-button" class="hidden">See Glucose Levels</button>
+        </div>
+
+        <div id="glucose-chart" class="section hidden">
+            <h2>Glucose Levels</h2>
+            <div id="glucose-line"></div>
+        </div>
+
+        <div id="conclusion" class="section hidden">
+            <h2>Summary</h2>
+            <p>This meal's impact on glucose levels shows how different nutritional compositions affect blood sugar. Understanding these patterns helps in making informed dietary choices.</p>
+            <button id="try-again">Try Again</button>
+        </div>
+    </div>
+    <script src="main.js"></script>
 </body>
 </html>

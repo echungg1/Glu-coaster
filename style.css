@@ -1,0 +1,150 @@
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.section {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.character-cards {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.character-card {
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 300px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.character-card[data-character="jack"] {
+    border-color: #007bff;
+}
+
+.character-card[data-character="jill"] {
+    border-color: #ff69b4;
+}
+
+.character-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.character-card[data-character="jack"].selected {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.character-card[data-character="jill"].selected {
+    border-color: #ff69b4;
+    box-shadow: 0 0 0 2px rgba(255,105,180,0.25);
+}
+
+.character-card h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+#meal-dropdown {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#glucose-button {
+    display: block;
+    margin: 1rem auto;
+    background-color: #28a745;
+}
+
+#glucose-button:hover {
+    background-color: #218838;
+}
+
+#try-again {
+    background-color: #6c757d;
+    margin-top: 1rem;
+}
+
+#try-again:hover {
+    background-color: #5a6268;
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Chart styles */
+#nutrition-bars, #glucose-line {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+.brush .selection {
+    fill: #007bff;
+    fill-opacity: 0.1;
+    stroke: #007bff;
+    stroke-width: 1px;
+} 

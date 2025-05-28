@@ -104,6 +104,14 @@ function createNutritionChart(mealInfo) {
             return difference > 0 ? '#dc3545' : '#6f42c1'; // Red if above baseline, Purple if below
         })
         .on('mouseover', function(event, d) {
+            // Fade all other bars
+            svg.selectAll('rect')
+                .transition()
+                .duration(200)
+                .style('opacity', function(currentD) {
+                    return currentD === d ? 1 : 0.3;
+                });
+
             const value = values[nutrients.indexOf(d)];
             const baseline = getBaseline(d);
             const difference = value - baseline;
@@ -123,6 +131,12 @@ function createNutritionChart(mealInfo) {
             `);
         })
         .on('mouseout', function() {
+            // Restore opacity of all bars
+            svg.selectAll('rect')
+                .transition()
+                .duration(200)
+                .style('opacity', 1);
+            
             d3.selectAll('.tooltip').remove();
         });
 

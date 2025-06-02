@@ -46,6 +46,8 @@ h2 {
     width: 300px;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .character-card[data-character="jack"] {
@@ -63,12 +65,40 @@ h2 {
 
 .character-card[data-character="jack"].selected {
     border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.3);
+    background-color: rgba(0,123,255,0.05);
+    transform: translateY(-5px);
 }
 
 .character-card[data-character="jill"].selected {
     border-color: #ff69b4;
-    box-shadow: 0 0 0 2px rgba(255,105,180,0.25);
+    box-shadow: 0 0 0 3px rgba(255,105,180,0.3);
+    background-color: rgba(255,105,180,0.05);
+    transform: translateY(-5px);
+}
+
+.character-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.character-card[data-character="jack"].selected::after {
+    color: #007bff;
+}
+
+.character-card[data-character="jill"].selected::after {
+    color: #ff69b4;
 }
 
 .character-card h3 {
@@ -128,6 +158,20 @@ button:hover {
     font-size: 0.875rem;
     pointer-events: none;
     z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tooltip-img {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+    transform: translate(-50%, -50%);
+    display: none;
+    background-color: transparent;
 }
 
 .hidden {

@@ -124,10 +124,19 @@ function createNutritionChart(mealInfo) {
                 .style('top', (event.pageY - 10) + 'px');
             
             tooltip.html(`
-                <strong>${d}</strong><br>
-                Current: ${value}g<br>
-                Baseline: ${baseline}g<br>
-                ${absDifference}g ${status} baseline
+                <div style="font-weight: bold; margin-bottom: 4px;">${d}</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Current:</span>
+                    <span>${value}g</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Baseline:</span>
+                    <span>${baseline}g</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Difference:</span>
+                    <span>${absDifference}g ${status}</span>
+                </div>
             `);
         })
         .on('mouseout', function() {
@@ -300,32 +309,13 @@ function createGlucoseChart(mealInfo) {
         .style('text-anchor', 'middle')
         .style('font-size', '12px');
 
-    // Add x-axis label
-    svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', height + margin.bottom - 10)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '14px')
-        .style('font-weight', 'bold')
-        .text('Time');
-
     // Add y-axis
     svg.append('g')
         .call(d3.axisLeft(y))
         .selectAll('text')
         .style('font-size', '12px');
 
-    // Add y-axis label
-    svg.append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', -margin.left + 15)
-        .attr('x', -height / 2)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '14px')
-        .style('font-weight', 'bold')
-        .text('Glucose Level (mg/dL)');
-
-    // Add Dexcom GL line
+    // Add line
     const line = d3.line()
         .x(d => x(d.Timestamp))
         .y(d => y(d['Dexcom GL']));
@@ -337,27 +327,24 @@ function createGlucoseChart(mealInfo) {
         .attr('stroke-width', 2)
         .attr('d', line);
 
-    // Add annotations for meals
+    // Add meal annotations
     const meals = dayData.filter(d => d['Meal Type']);
     meals.forEach(meal => {
         const mealType = meal['Meal Type'].toLowerCase();
-        // Only process breakfast, lunch, and dinner
         if (['breakfast', 'lunch', 'dinner'].includes(mealType)) {
-            // Add vertical line for meal time
             svg.append('line')
                 .attr('x1', x(meal.Timestamp))
                 .attr('x2', x(meal.Timestamp))
-                .attr('y1', 20)  // Start 20px from top
+                .attr('y1', 20)
                 .attr('y2', height)
                 .attr('stroke', '#dc3545')
                 .attr('stroke-width', 1)
                 .attr('stroke-dasharray', '4,4')
                 .style('opacity', 0.7);
 
-            // Add meal label
             svg.append('text')
                 .attr('x', x(meal.Timestamp))
-                .attr('y', 15)  // Position text just above the line
+                .attr('y', 15)
                 .attr('text-anchor', 'middle')
                 .style('font-size', '12px')
                 .style('fill', '#dc3545')
@@ -365,46 +352,37 @@ function createGlucoseChart(mealInfo) {
         }
     });
 
-    // Add brushing with tooltip
+    // Add brushing (same as before)
     const brush = d3.brushX()
         .extent([[0, 0], [width, height]])
         .on('end', function(event) {
             if (!event.selection) return;
-            
             const [x0, x1] = event.selection;
             const selectedData = dayData.filter(d => {
                 const xPos = x(d.Timestamp);
                 return xPos >= x0 && xPos <= x1;
             });
-
-            // Create tooltip for brushed area
             const tooltip = d3.select('body').append('div')
                 .attr('class', 'tooltip')
                 .style('left', (event.pageX + 10) + 'px')
                 .style('top', (event.pageY - 10) + 'px');
-
             const avgGlucose = d3.mean(selectedData, d => d['Dexcom GL']);
             const minGlucose = d3.min(selectedData, d => d['Dexcom GL']);
             const maxGlucose = d3.max(selectedData, d => d['Dexcom GL']);
-            
             tooltip.html(`
                 Time Range: ${selectedData[0].Timestamp.toLocaleTimeString()} - ${selectedData[selectedData.length-1].Timestamp.toLocaleTimeString()}<br>
                 Average Glucose: ${avgGlucose.toFixed(1)} mg/dL<br>
                 Min: ${minGlucose.toFixed(1)} mg/dL<br>
                 Max: ${maxGlucose.toFixed(1)} mg/dL
             `);
-
-            // Remove tooltip after 2 seconds
-            setTimeout(() => {
-                tooltip.remove();
-            }, 2000);
+            setTimeout(() => tooltip.remove(), 2000);
         });
 
     svg.append('g')
         .attr('class', 'brush')
         .call(brush);
 
-    // Add hover line and tooltip
+    // Add hover line
     const hoverLine = svg.append('line')
         .attr('class', 'hover-line')
         .attr('stroke', '#666')
@@ -412,6 +390,10 @@ function createGlucoseChart(mealInfo) {
         .attr('stroke-dasharray', '4,4')
         .style('display', 'none');
 
+    // Tooltip image element
+    const tooltipImg = d3.select("#tooltip-img");
+
+    // Hover interaction
     svg.append('rect')
         .attr('width', width)
         .attr('height', height)
@@ -419,45 +401,55 @@ function createGlucoseChart(mealInfo) {
         .style('pointer-events', 'all')
         .on('mouseover', function() {
             hoverLine.style('display', null);
+            tooltipImg.style('display', 'block');  // Show the image
         })
         .on('mouseout', function() {
             hoverLine.style('display', 'none');
+            tooltipImg.style('display', 'none');   // Hide the image
+            tooltipImg.style('opacity', 0);
             d3.selectAll('.tooltip').remove();
         })
         .on('mousemove', function(event) {
-            const xPos = d3.pointer(event)[0];
+            const [xPos] = d3.pointer(event);
             const xDate = x.invert(xPos);
-            
-            // Update hover line
-            hoverLine
-                .attr('x1', xPos)
-                .attr('x2', xPos)
-                .attr('y1', 0)
-                .attr('y2', height);
-
-            // Find closest data point
+        
             const bisect = d3.bisector(d => d.Timestamp).left;
             const i = bisect(dayData, xDate, 1);
             const d0 = dayData[i - 1];
             const d1 = dayData[i];
             const d = xDate - d0.Timestamp > d1.Timestamp - xDate ? d1 : d0;
-
-            // Remove any existing tooltip before creating a new one
+        
+            const exactX = x(d.Timestamp);
+            const exactY = y(d['Dexcom GL']);
+        
+            // Get the position of the SVG in the page
+            const svgRect = svg.node().getBoundingClientRect();
+        
+            // Set image position relative to the full page
+            tooltipImg
+                .style('opacity', 1)
+                .style('left', `${svgRect.left + exactX + 30}px`)
+                .style('top', `${svgRect.top + exactY + 30}px`);
+        
+            // Hover line
+            hoverLine
+                .attr('x1', exactX)
+                .attr('x2', exactX)
+                .attr('y1', 0)
+                .attr('y2', height);
+        
+            // Tooltip box - now follows mouse cursor
             d3.selectAll('.tooltip').remove();
-
-            // Update tooltip
-            const tooltip = d3.select('body').append('div')
+            d3.select('body').append('div')
                 .attr('class', 'tooltip')
-                .style('left', (event.pageX + 10) + 'px')
-                .style('top', (event.pageY - 10) + 'px');
-
-            tooltip.html(`
-                Time: ${d.Timestamp.toLocaleTimeString()}<br>
-                Glucose: ${d['Dexcom GL'].toFixed(1)} mg/dL
-            `);
+                .style('left', `${event.pageX + 10}px`)
+                .style('top', `${event.pageY - 10}px`)
+                .html(`
+                    Time: ${d.Timestamp.toLocaleTimeString()}<br>
+                    Glucose: ${d['Dexcom GL'].toFixed(1)} mg/dL
+                `);
         });
 
-    // Add title
     svg.append('text')
         .attr('x', width / 2)
         .attr('y', -margin.top / 2)
@@ -465,7 +457,7 @@ function createGlucoseChart(mealInfo) {
         .style('font-size', '16px')
         .text(`${selectedCharacter === 'jack' ? "Jack's" : "Jill's"} Glucose Levels Throughout the Day`);
 
-    // Add takeaway container
+    // Takeaway box
     const takeawayContainer = container.append('div')
         .style('margin-left', '20px')
         .style('width', '300px')
@@ -476,14 +468,13 @@ function createGlucoseChart(mealInfo) {
         .style('border-radius', '5px')
         .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
 
-    // Add takeaway text
     takeawayContainer.append('div')
         .style('font-weight', 'bold')
         .style('margin-bottom', '10px')
         .text('Health Implications:');
 
     takeawayContainer.append('div')
-        .text('You should strive to meet the aforementioned NIH recommendations to be able to live healthily and avoid insulin resistance. Insulin resistance is the preliminary indicator for type 2 diabetes. In the long term, repeated spikes in your blood sugar can cause heart problems, kidney problems, problems with eyesight, and nerve issues like neuropathy, where you lose feeling in fingers and toes.');
+        .text('Rollercoaster drops are fun, but Glu-coaster drops are not. You should strive to meet the aforementioned NIH recommendations to be able to live healthily and avoid insulin resistance. Insulin resistance is the preliminary indicator for type 2 diabetes. In the long term, repeated spikes in your blood sugar can cause heart problems, kidney problems, problems with eyesight, and nerve issues like neuropathy, where you lose feeling in fingers and toes.');
 }
 
 // Helper function to get baseline values

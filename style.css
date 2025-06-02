@@ -46,8 +46,6 @@ h2 {
     width: 300px;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
 .character-card[data-character="jack"] {
@@ -65,40 +63,12 @@ h2 {
 
 .character-card[data-character="jack"].selected {
     border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0,123,255,0.3);
-    background-color: rgba(0,123,255,0.05);
-    transform: translateY(-5px);
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
 .character-card[data-character="jill"].selected {
     border-color: #ff69b4;
-    box-shadow: 0 0 0 3px rgba(255,105,180,0.3);
-    background-color: rgba(255,105,180,0.05);
-    transform: translateY(-5px);
-}
-
-.character-card.selected::after {
-    content: '✓';
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 24px;
-    height: 24px;
-    background-color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.character-card[data-character="jack"].selected::after {
-    color: #007bff;
-}
-
-.character-card[data-character="jill"].selected::after {
-    color: #ff69b4;
+    box-shadow: 0 0 0 2px rgba(255,105,180,0.25);
 }
 
 .character-card h3 {
@@ -158,7 +128,6 @@ button:hover {
     font-size: 0.875rem;
     pointer-events: none;
     z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .tooltip-img {
@@ -172,8 +141,8 @@ button:hover {
     transform: translate(-50%, -50%);
     display: none;
     background-color: transparent;
-}
-
+ }
+ 
 .hidden {
     display: none;
 }
@@ -191,4 +160,201 @@ button:hover {
     fill-opacity: 0.1;
     stroke: #007bff;
     stroke-width: 1px;
+} 
+#meal-gallery {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    white-space: nowrap;
+}
+
+#meal-gallery::-webkit-scrollbar {
+    height: 6px;
+}
+
+#meal-gallery::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#meal-gallery::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#meal-gallery::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.meal-card {
+    flex: 0 0 auto;
+    width: 200px;
+    height: 200px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white;
+    display: inline-block;
+}
+
+.meal-card:hover {
+    transform: translateY(-5px);
+}
+
+.meal-card.selected {
+    border: 3px solid #007bff;
+}
+
+.meal-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.meal-name {
+    display: none; /* Hide the meal name since cards are now small */
+}
+
+#meal-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden; /* Ensure the container doesn't show scrollbars */
+}
+
+#add-to-cart {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+}
+
+#add-to-cart:hover {
+    background-color: #0056b3;
+}
+
+#add-to-cart:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+} 
+
+
+#meal-gallery {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 15px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+#meal-gallery::-webkit-scrollbar {
+    height: 6px;
+}
+
+#meal-gallery::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#meal-gallery::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#meal-gallery::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.meal-card {
+    flex: 0 0 auto;
+    width: 160px;
+    height: 200px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white;
+    border: 2px solid transparent;
+}
+
+.meal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.meal-card.selected {
+    border: 2px solid #007bff;
+    box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+}
+
+.meal-card canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.meal-name {
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    background: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid #eee;
+}
+
+#meal-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#add-to-cart {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+}
+
+#add-to-cart:hover {
+    background-color: #0056b3;
+}
+
+#add-to-cart:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 } 

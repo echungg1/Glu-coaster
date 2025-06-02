@@ -20,22 +20,84 @@ document.querySelectorAll('.character-card').forEach(card => {
         // Load meal data
         mealData = await loadData(selectedCharacter);
         
-        // Populate meal dropdown
-        const uniqueMeals = [...new Set(mealData.map(d => d.Meal))].filter(Boolean);
-        const dropdown = document.getElementById('meal-dropdown');
-        dropdown.innerHTML = '<option value="">Choose a meal...</option>' +
-            uniqueMeals.map(meal => `<option value="${meal}">${meal}</option>`).join('');
+        // Create meal gallery
+        createMealGallery();
         
         // Show meal section
         document.getElementById('meal-section').classList.remove('hidden');
     });
 });
 
+// Create horizontal scrollable meal gallery
+function createMealGallery() {
+    const uniqueMeals = [...new Set(mealData.map(d => d.Meal))].filter(Boolean);
+    const galleryContainer = document.getElementById('meal-gallery');
+    galleryContainer.innerHTML = ''; // Clear existing content
+    
+    uniqueMeals.forEach(meal => {
+        const mealCard = document.createElement('div');
+        mealCard.className = 'meal-card';
+        
+        // Create canvas element
+        const canvas = document.createElement('canvas');
+        canvas.width = 120;  // Match the CSS width
+        canvas.height = 140; // Height for image + name
+        const ctx = canvas.getContext('2d');
+        
+        // Create image element for loading
+        const img = new Image();
+        const imageName = meal.toLowerCase().replace(/\s+/g, '_') + '.png';
+        img.src = `images/${imageName}`;
+        
+        // When image loads, draw it on canvas
+        img.onload = () => {
+            // Draw white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw image
+            ctx.drawImage(img, 0, 0, canvas.width, 100);
+            
+            // Draw separator line
+            ctx.beginPath();
+            ctx.moveTo(0, 100);
+            ctx.lineTo(canvas.width, 100);
+            ctx.strokeStyle = '#eee';
+            ctx.stroke();
+            
+            // Draw meal name
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Handle text overflow
+            const maxWidth = canvas.width - 16; // 8px padding on each side
+            let text = meal;
+            if (ctx.measureText(text).width > maxWidth) {
+                while (ctx.measureText(text + '...').width > maxWidth && text.length > 0) {
+                    text = text.slice(0, -1);
+                }
+                text += '...';
+            }
+            
+            ctx.fillText(text, canvas.width / 2, 120);
+        };
+        
+        // Add click event to select meal
+        mealCard.addEventListener('click', () => {
+            document.querySelectorAll('.meal-card').forEach(card => card.classList.remove('selected'));
+            mealCard.classList.add('selected');
+            selectedMeal = meal;
+        });
+        
+        mealCard.appendChild(canvas);
+        galleryContainer.appendChild(mealCard);
+    });
+}
+
 // Meal selection and visualization
 document.getElementById('add-to-cart').addEventListener('click', () => {
-    const mealSelect = document.getElementById('meal-dropdown');
-    selectedMeal = mealSelect.value;
-    
     if (selectedMeal) {
         const mealInfo = mealData.find(d => d.Meal === selectedMeal);
         createNutritionChart(mealInfo);
@@ -124,19 +186,10 @@ function createNutritionChart(mealInfo) {
                 .style('top', (event.pageY - 10) + 'px');
             
             tooltip.html(`
-                <div style="font-weight: bold; margin-bottom: 4px;">${d}</div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                    <span>Current:</span>
-                    <span>${value}g</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                    <span>Baseline:</span>
-                    <span>${baseline}g</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Difference:</span>
-                    <span>${absDifference}g ${status}</span>
-                </div>
+                <strong>${d}</strong><br>
+                Current: ${value}g<br>
+                Baseline: ${baseline}g<br>
+                ${absDifference}g ${status} baseline
             `);
         })
         .on('mouseout', function() {
@@ -269,13 +322,16 @@ function createGlucoseChart(mealInfo) {
     const width = 760 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
+
     // Clear previous chart
     d3.select('#glucose-line').html('');
+
 
     // Create container for chart and takeaway
     const container = d3.select('#glucose-line')
         .style('display', 'flex')
         .style('align-items', 'flex-start');
+
 
     // Create SVG container
     const svg = container.append('svg')
@@ -284,8 +340,10 @@ function createGlucoseChart(mealInfo) {
         .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
+
     // Filter data for the selected day
     const dayData = mealData.filter(d => d.Timestamp.startsWith(mealInfo.Timestamp.split(' ')[0]));
+
 
     // Parse timestamps
     dayData.forEach(d => {
@@ -293,13 +351,16 @@ function createGlucoseChart(mealInfo) {
         d['Dexcom GL'] = +d['Dexcom GL'] || 0;
     });
 
+
     const x = d3.scaleTime()
         .domain(d3.extent(dayData, d => d.Timestamp))
         .range([0, width]);
 
+
     const y = d3.scaleLinear()
         .domain([0, d3.max(dayData, d => d['Dexcom GL']) * 1.2])
         .range([height, 0]);
+
 
     // Add x-axis
     svg.append('g')
@@ -309,16 +370,19 @@ function createGlucoseChart(mealInfo) {
         .style('text-anchor', 'middle')
         .style('font-size', '12px');
 
+
     // Add y-axis
     svg.append('g')
         .call(d3.axisLeft(y))
         .selectAll('text')
         .style('font-size', '12px');
 
+
     // Add line
     const line = d3.line()
         .x(d => x(d.Timestamp))
         .y(d => y(d['Dexcom GL']));
+
 
     svg.append('path')
         .datum(dayData)
@@ -326,6 +390,7 @@ function createGlucoseChart(mealInfo) {
         .attr('stroke', '#28a745')
         .attr('stroke-width', 2)
         .attr('d', line);
+
 
     // Add meal annotations
     const meals = dayData.filter(d => d['Meal Type']);
@@ -342,6 +407,7 @@ function createGlucoseChart(mealInfo) {
                 .attr('stroke-dasharray', '4,4')
                 .style('opacity', 0.7);
 
+
             svg.append('text')
                 .attr('x', x(meal.Timestamp))
                 .attr('y', 15)
@@ -351,6 +417,7 @@ function createGlucoseChart(mealInfo) {
                 .text(mealType.charAt(0).toUpperCase() + mealType.slice(1));
         }
     });
+
 
     // Add brushing (same as before)
     const brush = d3.brushX()
@@ -378,9 +445,11 @@ function createGlucoseChart(mealInfo) {
             setTimeout(() => tooltip.remove(), 2000);
         });
 
+
     svg.append('g')
         .attr('class', 'brush')
         .call(brush);
+
 
     // Add hover line
     const hoverLine = svg.append('line')
@@ -390,8 +459,10 @@ function createGlucoseChart(mealInfo) {
         .attr('stroke-dasharray', '4,4')
         .style('display', 'none');
 
+
     // Tooltip image element
     const tooltipImg = d3.select("#tooltip-img");
+
 
     // Hover interaction
     svg.append('rect')
@@ -450,12 +521,14 @@ function createGlucoseChart(mealInfo) {
                 `);
         });
 
+
     svg.append('text')
         .attr('x', width / 2)
         .attr('y', -margin.top / 2)
         .attr('text-anchor', 'middle')
         .style('font-size', '16px')
         .text(`${selectedCharacter === 'jack' ? "Jack's" : "Jill's"} Glucose Levels Throughout the Day`);
+
 
     // Takeaway box
     const takeawayContainer = container.append('div')
@@ -468,14 +541,17 @@ function createGlucoseChart(mealInfo) {
         .style('border-radius', '5px')
         .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
 
+
     takeawayContainer.append('div')
         .style('font-weight', 'bold')
         .style('margin-bottom', '10px')
         .text('Health Implications:');
 
+
     takeawayContainer.append('div')
         .text('Rollercoaster drops are fun, but Glu-coaster drops are not. You should strive to meet the aforementioned NIH recommendations to be able to live healthily and avoid insulin resistance. Insulin resistance is the preliminary indicator for type 2 diabetes. In the long term, repeated spikes in your blood sugar can cause heart problems, kidney problems, problems with eyesight, and nerve issues like neuropathy, where you lose feeling in fingers and toes.');
 }
+
 
 // Helper function to get baseline values
 function getBaseline(nutrient) {

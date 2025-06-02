@@ -142,7 +142,93 @@ button:hover {
     display: none;
     background-color: transparent;
  }
+
  
+ .character-cards {
+   display: flex;
+   gap: 2rem;
+   justify-content: center;
+   margin-top: 2rem;
+}
+
+
+.character-card {
+   background: #fff;
+   border: 2px solid #e9ecef;
+   border-radius: 8px;
+   padding: 1.5rem;
+   width: 300px;
+   cursor: pointer;
+   transition: all 0.3s ease;
+   position: relative;
+   overflow: hidden;
+}
+
+
+.character-card[data-character="jack"] {
+   border-color: #007bff;
+}
+
+
+.character-card[data-character="jill"] {
+   border-color: #ff69b4;
+}
+
+
+.character-card:hover {
+   transform: translateY(-5px);
+   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+
+.character-card[data-character="jack"].selected {
+   border-color: #007bff;
+   box-shadow: 0 0 0 3px rgba(0,123,255,0.3);
+   background-color: rgba(0,123,255,0.05);
+   transform: translateY(-5px);
+}
+
+
+.character-card[data-character="jill"].selected {
+   border-color: #ff69b4;
+   box-shadow: 0 0 0 3px rgba(255,105,180,0.3);
+   background-color: rgba(255,105,180,0.05);
+   transform: translateY(-5px);
+}
+
+
+.character-card.selected::after {
+   content: '✓';
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   width: 24px;
+   height: 24px;
+   background-color: #fff;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-weight: bold;
+   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+.character-card[data-character="jack"].selected::after {
+   color: #007bff;
+}
+
+
+.character-card[data-character="jill"].selected::after {
+   color: #ff69b4;
+}
+
+
+.character-card h3 {
+   color: #2c3e50;
+   margin-bottom: 1rem;
+}
+
 .hidden {
     display: none;
 }
@@ -237,7 +323,7 @@ button:hover {
 #add-to-cart {
     margin-top: 20px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: #36c557;  /* Changed from #007bff to a lighter blue */
     color: white;
     border: none;
     border-radius: 4px;
@@ -247,7 +333,7 @@ button:hover {
 }
 
 #add-to-cart:hover {
-    background-color: #0056b3;
+    background-color: #218838;
 }
 
 #add-to-cart:disabled {
@@ -337,24 +423,3 @@ button:hover {
     border-radius: 8px;
     overflow: hidden;
 }
-
-#add-to-cart {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease;
-}
-
-#add-to-cart:hover {
-    background-color: #0056b3;
-}
-
-#add-to-cart:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-} 

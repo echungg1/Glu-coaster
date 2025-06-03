@@ -25,6 +25,9 @@ document.querySelectorAll('.character-card').forEach(card => {
         
         // Show meal section
         document.getElementById('meal-section').classList.remove('hidden');
+        const scrollChar = document.getElementById('scroll-indicator-character');
+        scrollChar.classList.remove('hidden');
+
     });
 });
 
@@ -103,7 +106,15 @@ document.getElementById('add-to-cart').addEventListener('click', () => {
         createNutritionChart(mealInfo);
         document.getElementById('nutrition-chart').classList.remove('hidden');
         document.getElementById('glucose-button').classList.remove('hidden');
+        const scrollNutrition = document.getElementById('scroll-indicator-nutrition');
+        scrollNutrition.classList.remove('hidden');
+
+        // Uncomment if we want it to disappear after 5 seconds
+        // setTimeout(() => {
+        //     scrollNutrition.classList.add('hidden');
+        // }, 5000);
     }
+    
 });
 
 // Create nutrition bar chart
@@ -583,4 +594,19 @@ document.getElementById('glucose-button').addEventListener('click', () => {
     createGlucoseChart(mealInfo);
     document.getElementById('glucose-chart').classList.remove('hidden');
     document.getElementById('conclusion').classList.remove('hidden');
+
+    const scrollGlucose = document.getElementById('scroll-indicator-glucose');
+    scrollGlucose.classList.remove('hidden');
+
+    // Automatically scroll
+    document.getElementById('glucose-chart').scrollIntoView({ behavior: 'smooth' });
+
+
+    // Uncomment if we want it to disappear after 5 seconds
+    // setTimeout(() => scrollGlucose.classList.add('hidden'), 5000);
 }); 
+
+document.getElementById('watch-video-button').addEventListener('click', () => {
+    window.open('https://youtu.be/B_NPllGhXpw', '_blank');
+  });
+  

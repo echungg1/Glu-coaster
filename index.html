@@ -11,6 +11,8 @@
 </head>
 <img id="tooltip-img" src="coaster.png" alt="coaster" class="tooltip-img">
 <body>
+    <button id="watch-video-button">🎥 Watch the Glucoaster Video</button>
+
     <div class="container">
         <div id="story" class="section">
             <h1>Glu-coaster: An Interactive Journey Through Glucose Management</h1>
@@ -46,22 +48,27 @@
                     <p>Weight: 127 lbs</p>
                 </div>
             </div>
+            <div id="scroll-indicator-character" class="hidden">⬇️ Scroll down</div>
         </div>
+        
 
         <div id="meal-section" class="hidden">
             <h2>Select a Meal</h2>
             <div id="meal-gallery"></div>
             <button id="add-to-cart">Add to cart 🛒</button>
+            <div id="scroll-indicator-nutrition" class="hidden">⬇️ Scroll down</div>
         </div>
 
         <div id="nutrition-chart" class="section hidden">
             <h2>Nutrition Information</h2>
             <div id="nutrition-bars"></div>
             <button id="glucose-button" class="hidden">See Glucose Levels</button>
+            <div id="scroll-indicator-glucose" class="hidden">⬇️ Scroll down</div>
         </div>
 
         <div id="glucose-chart" class="section hidden">
             <h2>Glucose Levels</h2>
+            
             <div id="glucose-line"></div>
         </div>
 

@@ -3,6 +3,37 @@ let selectedCharacter = null;
 let selectedMeal = null;
 let mealData = null;
 
+// Typing animation function
+function typeText(element, text, speed = 30) {
+    return new Promise((resolve) => {
+        let i = 0;
+        element.textContent = '';
+        
+        function type() {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            } else {
+                // Add a delay after finishing typing
+                setTimeout(resolve, 1000); // 1 second delay after each line
+            }
+        }
+        
+        type();
+    });
+}
+
+// Initialize typing animation
+document.addEventListener('DOMContentLoaded', async () => {
+    const typingElements = document.querySelectorAll('.typing-text');
+    
+    for (const element of typingElements) {
+        const text = element.getAttribute('data-text');
+        await typeText(element, text);
+    }
+});
+
 // Load CSV data
 async function loadData(character) {
     const file = character === 'jack' ? 'male.csv' : 'female.csv';
@@ -50,6 +81,7 @@ function createMealGallery() {
         // Create image element for loading
         const img = new Image();
         const imageName = meal.toLowerCase().replace(/\s+/g, '_') + '.png';
+        
         img.src = `images/${imageName}`;
         
         // When image loads, draw it on canvas
@@ -70,13 +102,15 @@ function createMealGallery() {
             
             // Draw meal name
             ctx.fillStyle = '#333';
-            ctx.font = '12px Inter';
+            ctx.font = '10px Inter';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            // remove all non-alphanumeric characters and replace underscores with spaces and capitalize the first letter
+            cleanedmeal = meal.replace(/[^\w\s]/g, '').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
             
             // Handle text overflow
             const maxWidth = canvas.width - 16; // 8px padding on each side
-            let text = meal;
+            let text = cleanedmeal;
             if (ctx.measureText(text).width > maxWidth) {
                 while (ctx.measureText(text + '...').width > maxWidth && text.length > 0) {
                     text = text.slice(0, -1);
@@ -175,7 +209,24 @@ function createNutritionChart(mealInfo) {
             const difference = value - baseline;
             if (difference === 0) return '#007bff';  // Blue for exact match
             return difference > 0 ? '#dc3545' : '#6f42c1'; // Red if above baseline, Purple if below
-        })
+        });
+
+    // Add baseline lines
+    svg.selectAll('.baseline')
+        .data(nutrients)
+        .enter()
+        .append('line')
+        .attr('class', 'baseline')
+        .attr('x1', d => x(d))
+        .attr('x2', d => x(d) + x.bandwidth())
+        .attr('y1', d => y(getBaseline(d)))
+        .attr('y2', d => y(getBaseline(d)))
+        .attr('stroke', 'black')
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '3,3');
+
+    // Add hover interaction
+    svg.selectAll('rect')
         .on('mouseover', function(event, d) {
             // Fade all other bars
             svg.selectAll('rect')
@@ -222,17 +273,29 @@ function createNutritionChart(mealInfo) {
     const legendItems = [
         { color: '#dc3545', text: 'Above Baseline' },
         { color: '#007bff', text: 'At Baseline' },
-        { color: '#6f42c1', text: 'Below Baseline' }
+        { color: '#6f42c1', text: 'Below Baseline' },
+        { type: 'line', color: 'black', text: 'Baseline', dasharray: '3,3' }
     ];
 
     legendItems.forEach((item, i) => {
         const legendRow = legend.append('g')
             .attr('transform', `translate(0, ${i * 20})`);
 
-        legendRow.append('rect')
-            .attr('width', 15)
-            .attr('height', 15)
-            .attr('fill', item.color);
+        if (item.type === 'line') {
+            legendRow.append('line')
+                .attr('x1', 0)
+                .attr('x2', 15)
+                .attr('y1', 7.5)
+                .attr('y2', 7.5)
+                .attr('stroke', item.color)
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', item.dasharray);
+        } else {
+            legendRow.append('rect')
+                .attr('width', 15)
+                .attr('height', 15)
+                .attr('fill', item.color);
+        }
 
         legendRow.append('text')
             .attr('x', 20)
@@ -325,6 +388,7 @@ function createNutritionChart(mealInfo) {
 
     takeawayContainer.append('div')
         .text(summaryText);
+
 }
 
 // Create glucose line chart
@@ -352,15 +416,20 @@ function createGlucoseChart(mealInfo) {
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
 
-    // Filter data for the selected day
-    const dayData = mealData.filter(d => d.Timestamp.startsWith(mealInfo.Timestamp.split(' ')[0]));
-
-
-    // Parse timestamps
-    dayData.forEach(d => {
+    // Parse timestamps first
+    mealData.forEach(d => {
         d.Timestamp = new Date(d.Timestamp);
         d['Dexcom GL'] = +d['Dexcom GL'] || 0;
     });
+
+
+    // Filter data for the selected day
+    const selectedDate = new Date(mealInfo.Timestamp);
+    const dayData = mealData.filter(d => 
+        d.Timestamp.getDate() === selectedDate.getDate() &&
+        d.Timestamp.getMonth() === selectedDate.getMonth() &&
+        d.Timestamp.getFullYear() === selectedDate.getFullYear()
+    );
 
 
     const x = d3.scaleTime()
@@ -372,6 +441,14 @@ function createGlucoseChart(mealInfo) {
         .domain([0, d3.max(dayData, d => d['Dexcom GL']) * 1.2])
         .range([height, 0]);
 
+    // Add shaded region for ideal glucose range
+    svg.append('rect')
+        .attr('x', 0)
+        .attr('y', y(140))  // Top of the ideal range
+        .attr('width', width)
+        .attr('height', y(70) - y(140))  // Height between 70 and 140
+        .attr('fill', '#90EE90')  // Light green color
+        .attr('opacity', 0.3);  // Make it semi-transparent
 
     // Add x-axis
     svg.append('g')
@@ -510,7 +587,7 @@ function createGlucoseChart(mealInfo) {
             // Set image position relative to the full page
             tooltipImg
                 .style('opacity', 1)
-                .style('left', `${svgRect.left + exactX + 30}px`)
+                .style('left', `${svgRect.left + exactX + 60}px`)
                 .style('top', `${svgRect.top + exactY + 30}px`);
         
             // Hover line
@@ -540,6 +617,51 @@ function createGlucoseChart(mealInfo) {
         .style('font-size', '16px')
         .text(`${selectedCharacter === 'jack' ? "Jack's" : "Jill's"} Glucose Levels Throughout the Day`);
 
+    // Add warning annotation
+    svg.append('text')
+        .attr('x', width - 20)
+        .attr('y', 50)
+        .attr('text-anchor', 'end')
+        .style('font-size', '14px')
+        .style('font-weight', 'bold')
+        .style('fill', '#dc3545')  // Red color for warning
+        .text('Avoid Glucose Spikes!');
+
+    // Add x-axis label
+    svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', height + margin.bottom - 10)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '14px')
+        .style('font-weight', 'bold')
+        .text('Time');
+
+    // Add y-axis label
+    svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', -margin.left + 15)
+        .attr('x', -height / 2)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '14px')
+        .style('font-weight', 'bold')
+        .text('Glucose Levels (mg/dL)');
+
+    // Add legend for ideal glucose range
+    const glucoseLegend = svg.append('g')
+        .attr('class', 'glucose-legend')
+        .attr('transform', `translate(${width - 220}, ${height - 20})`);
+
+    glucoseLegend.append('rect')
+        .attr('width', 15)
+        .attr('height', 15)
+        .attr('fill', '#90EE90')
+        .attr('opacity', 0.3);
+
+    glucoseLegend.append('text')
+        .attr('x', 20)
+        .attr('y', 12)
+        .style('font-size', '12px')
+        .text('Ideal Glucose Range (70-140 mg/dL)');
 
     // Takeaway box
     const takeawayContainer = container.append('div')
@@ -560,7 +682,7 @@ function createGlucoseChart(mealInfo) {
 
 
     takeawayContainer.append('div')
-        .text('Rollercoaster drops are fun, but Glu-coaster drops are not. You should strive to meet the aforementioned NIH recommendations to be able to live healthily and avoid insulin resistance. Insulin resistance is the preliminary indicator for type 2 diabetes. In the long term, repeated spikes in your blood sugar can cause heart problems, kidney problems, problems with eyesight, and nerve issues like neuropathy, where you lose feeling in fingers and toes.');
+        .text('Rollercoaster drops are fun, but Glu-coaster drops are not. You should strive to meet the aforementioned NIH recommendations to live healthily and avoid glucose spikes — repeated sharp rises in blood sugar levels that can strain your ability to regulate insulin. Over time, this can lead to insulin resistance, a key early indicator of type 2 diabetes. In the long term, frequent glucose spikes may contribute to heart problems, kidney damage, impaired eyesight, and nerve conditions like neuropathy, where sensation is lost in the fingers and toes.');
 }
 
 
@@ -584,6 +706,10 @@ document.getElementById('try-again').addEventListener('click', () => {
     document.getElementById('glucose-chart').classList.add('hidden');
     document.getElementById('glucose-button').classList.add('hidden');
     document.getElementById('conclusion').classList.add('hidden');
+    // Hide all scroll indicators
+    document.getElementById('scroll-indicator-character').classList.add('hidden');
+    document.getElementById('scroll-indicator-nutrition').classList.add('hidden');
+    document.getElementById('scroll-indicator-glucose').classList.add('hidden');
     selectedCharacter = null;
     selectedMeal = null;
 });

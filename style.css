@@ -1,5 +1,5 @@
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Georgia', 'Times New Roman', Times, serif;
     margin: 0;
     padding: 0;
     background-color: #f8f9fa;
@@ -457,4 +457,28 @@ button:hover {
   #watch-video-button:hover {
     background-color: #0056b3;
   }
+  
+.poem {
+    text-align: center;
+    margin: 2em 0;
+    font-size: 1.2em;
+    line-height: 1.6;
+}
+
+.typing-text {
+    min-height: 1.6em;
+    margin: 0.5em 0;
+    position: relative;
+}
+
+.typing-text::after {
+    content: '|';
+    position: absolute;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
   

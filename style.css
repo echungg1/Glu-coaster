@@ -375,7 +375,8 @@ button:hover {
 
 #scroll-indicator-nutrition,
 #scroll-indicator-glucose,
-#scroll-indicator-character {
+#scroll-indicator-character,
+#scroll-indicator-comparison {
     font-size: 1.2em;
     text-align: center;
     animation: bounce 1s infinite;
@@ -494,5 +495,97 @@ button:hover {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+#comparison-section {
+    margin-top: 2rem;
+}
+
+.comparison-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.comparison-side {
+    flex: 1;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.comparison-side h3 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.comparison-dropdown {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Georgia', 'Times New Roman', Times, serif;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.comparison-dropdown:hover {
+    border-color: #28a745;
+}
+
+.comparison-dropdown:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+
+.comparison-charts {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.comparison-chart {
+    flex: 1;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-left: 3px solid #28a745;
+    overflow: hidden;
+}
+
+.comparison-chart h3 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+#nutrition-bars-1, #nutrition-bars-2,
+#glucose-line-1, #glucose-line-2 {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 4px;
+    padding: 1rem;
+    box-shadow: -4px 0 8px rgba(40, 167, 69, 0.2);
+    overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+    .comparison-charts {
+        flex-direction: column;
+    }
+    
+    .comparison-chart {
+        margin-bottom: 2rem;
+    }
 }
   

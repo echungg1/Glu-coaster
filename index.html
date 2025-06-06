@@ -73,7 +73,49 @@
             <p>The participant had a protein shake for breakfast and chipotle for lunch. Hover over the plot to ride the Glu-coaster!</p>
             
             <div id="glucose-line"></div>
-            <button id="see-takeaways" class="hidden">See Takeaways</button>
+            <button id="see-takeaways" class="hidden">Compare Meals</button>
+        </div>
+
+        <div id="comparison-section" class="section hidden">
+            <h2>Compare Meals</h2>
+            <div class="comparison-controls">
+                <div class="comparison-side">
+                    <h3>First Meal</h3>
+                    <select id="character1" class="comparison-dropdown">
+                        <option value="">Select Character</option>
+                        <option value="jack">Jack</option>
+                        <option value="jill">Jill</option>
+                    </select>
+                    <select id="meal1" class="comparison-dropdown">
+                        <option value="">Select Meal</option>
+                    </select>
+                </div>
+                <div class="comparison-side">
+                    <h3>Second Meal</h3>
+                    <select id="character2" class="comparison-dropdown">
+                        <option value="">Select Character</option>
+                        <option value="jack">Jack</option>
+                        <option value="jill">Jill</option>
+                    </select>
+                    <select id="meal2" class="comparison-dropdown">
+                        <option value="">Select Meal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="comparison-charts">
+                <div class="comparison-chart">
+                    <h3>First Meal Analysis</h3>
+                    <div id="nutrition-bars-1"></div>
+                    <div id="glucose-line-1"></div>
+                </div>
+                <div class="comparison-chart">
+                    <h3>Second Meal Analysis</h3>
+                    <div id="nutrition-bars-2"></div>
+                    <div id="glucose-line-2"></div>
+                </div>
+            </div>
+            <!-- <button id="conclusion-go" class="hidden">See Takeaways</button> -->
+            <div id="scroll-indicator-comparison" class="hidden">⬇️ Scroll down</div>
         </div>
 
         <div id="conclusion" class="section hidden">

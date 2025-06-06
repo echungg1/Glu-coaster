@@ -3,6 +3,16 @@ let selectedCharacter = null;
 let selectedMeal = null;
 let mealData = null;
 
+// Comparison section functionality
+let comparisonData = {
+    character1: null,
+    character2: null,
+    meal1: null,
+    meal2: null,
+    data1: null,
+    data2: null
+};
+
 // Typing animation function
 function typeText(element, text, speed = 30) {
     return new Promise((resolve) => {
@@ -152,7 +162,7 @@ document.getElementById('add-to-cart').addEventListener('click', () => {
 });
 
 // Create nutrition bar chart
-function createNutritionChart(mealInfo) {
+function createNutritionChart(mealInfo, containerId = 'nutrition-bars') {
     const nutrients = ['Carbs', 'Protein', 'Fat', 'Fiber'];
     const values = [
         +mealInfo.Carbs || 0,
@@ -161,14 +171,16 @@ function createNutritionChart(mealInfo) {
         +mealInfo.Fiber || 0
     ];
 
+    // Adjust dimensions based on container
+    const isComparison = containerId.includes('1') || containerId.includes('2');
     const margin = {top: 40, right: 30, bottom: 60, left: 60};
-    const width = 700 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const width = isComparison ? 350 - margin.left - margin.right : 700 - margin.left - margin.right;
+    const height = isComparison ? 300 - margin.top - margin.bottom : 400 - margin.top - margin.bottom;
 
     // Clear previous chart
-    d3.select('#nutrition-bars').html('');
+    d3.select(`#${containerId}`).html('');
 
-    const svg = d3.select('#nutrition-bars')
+    const svg = d3.select(`#${containerId}`)
         .append('svg')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -337,76 +349,88 @@ function createNutritionChart(mealInfo) {
         .style('font-weight', 'bold')
         .text('Grams (g)');
 
-    // Add title
-    svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', -margin.top / 2)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '16px')
-        .text(`Nutritional Content for ${selectedMeal}`);
-
-    // Generate and display takeaway summary
-    const takeawayContainer = d3.select('#nutrition-bars')
-        .append('div')
-        .style('position', 'relative')
-        .style('display', 'inline-block')
-        .style('vertical-align', 'top')
-        .style('margin-left', '20px')
-        .style('width', '250px')
-        .style('font-size', '14px')
-        .style('line-height', '1.5')
-        .style('padding', '20px')
-        .style('background-color', '#f8f9fa')
-        .style('border-radius', '5px')
-        .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
-
-    // Analyze nutrient data
-    const aboveBaseline = nutrients.filter(n => values[nutrients.indexOf(n)] > getBaseline(n));
-    const belowBaseline = nutrients.filter(n => values[nutrients.indexOf(n)] < getBaseline(n));
-    const onPar = nutrients.filter(n => values[nutrients.indexOf(n)] === getBaseline(n));
-
-    // Generate summary text
-    let summaryText = '';
-    
-    if (aboveBaseline.length > 0) {
-        summaryText += `Your consumption of ${aboveBaseline.join(', ')} is above the baseline. `;
-    }
-    
-    if (belowBaseline.length > 0) {
-        summaryText += `Your consumption of ${belowBaseline.join(', ')} is below the baseline. `;
-    }
-    
-    if (onPar.length > 0) {
-        summaryText += `There was ${onPar.length} nutrient${onPar.length > 1 ? 's' : ''} which was on par with the recommendations from the National Institute of Health.`;
+    // Add title with different formatting for comparison
+    if (isComparison) {
+        const character = containerId.includes('1') ? comparisonData.character1 : comparisonData.character2;
+        const characterName = character === 'jack' ? "Jack's" : "Jill's";
+        svg.append('text')
+            .attr('x', width / 2)
+            .attr('y', -margin.top / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '16px')
+            .text(`${characterName} ${mealInfo.Meal.replace(/[^\w\s]/g, '').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}`);
+    } else {
+        svg.append('text')
+            .attr('x', width / 2)
+            .attr('y', -margin.top / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '16px')
+            .text(`Nutritional Content for ${selectedMeal}`);
     }
 
-    // Add summary text to container
-    takeawayContainer.append('div')
-        .style('font-weight', 'bold')
-        .style('margin-bottom', '10px')
-        .text('We can conclude the following based on the National Institute of Health\'s recommendations:');
+    // Only add takeaway summary for main view
+    if (!isComparison) {
+        // Generate and display takeaway summary
+        const takeawayContainer = d3.select(`#${containerId}`)
+            .append('div')
+            .style('position', 'relative')
+            .style('display', 'inline-block')
+            .style('vertical-align', 'top')
+            .style('margin-left', '20px')
+            .style('width', '250px')
+            .style('font-size', '14px')
+            .style('line-height', '1.5')
+            .style('padding', '20px')
+            .style('background-color', '#f8f9fa')
+            .style('border-radius', '5px')
+            .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
 
-    takeawayContainer.append('div')
-        .text(summaryText);
+        // Analyze nutrient data
+        const aboveBaseline = nutrients.filter(n => values[nutrients.indexOf(n)] > getBaseline(n));
+        const belowBaseline = nutrients.filter(n => values[nutrients.indexOf(n)] < getBaseline(n));
+        const onPar = nutrients.filter(n => values[nutrients.indexOf(n)] === getBaseline(n));
 
+        // Generate summary text
+        let summaryText = '';
+        
+        if (aboveBaseline.length > 0) {
+            summaryText += `Your consumption of ${aboveBaseline.join(', ')} is above the baseline. `;
+        }
+        
+        if (belowBaseline.length > 0) {
+            summaryText += `Your consumption of ${belowBaseline.join(', ')} is below the baseline. `;
+        }
+        
+        if (onPar.length > 0) {
+            summaryText += `There was ${onPar.length} nutrient${onPar.length > 1 ? 's' : ''} which was on par with the recommendations from the National Institute of Health.`;
+        }
+
+        // Add summary text to container
+        takeawayContainer.append('div')
+            .style('font-weight', 'bold')
+            .style('margin-bottom', '10px')
+            .text('We can conclude the following based on the National Institute of Health\'s recommendations:');
+
+        takeawayContainer.append('div')
+            .text(summaryText);
+    }
 }
 
 // Create glucose line chart
-function createGlucoseChart(mealInfo) {
+function createGlucoseChart(mealInfo, containerId = 'glucose-line', data = mealData) {
+    // Adjust dimensions based on container
+    const isComparison = containerId.includes('1') || containerId.includes('2');
     const margin = {top: 40, right: 30, bottom: 60, left: 60};
-    const width = 760 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
-
+    const width = isComparison ? 350 - margin.left - margin.right : 760 - margin.left - margin.right;
+    const height = isComparison ? 300 - margin.top - margin.bottom : 400 - margin.top - margin.bottom;
 
     // Clear previous chart
-    d3.select('#glucose-line').html('');
-
+    d3.select(`#${containerId}`).html('');
 
     // Create container for chart and takeaway
-    const container = d3.select('#glucose-line')
+    const container = d3.select(`#${containerId}`)
         .style('display', 'flex')
         .style('align-items', 'flex-start');
-
 
     // Create SVG container
     const svg = container.append('svg')
@@ -415,27 +439,35 @@ function createGlucoseChart(mealInfo) {
         .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-
     // Parse timestamps first
-    mealData.forEach(d => {
+    data.forEach(d => {
         d.Timestamp = new Date(d.Timestamp);
         d['Dexcom GL'] = +d['Dexcom GL'] || 0;
     });
 
-
     // Filter data for the selected day
     const selectedDate = new Date(mealInfo.Timestamp);
-    const dayData = mealData.filter(d => 
+    let dayData = data.filter(d => 
         d.Timestamp.getDate() === selectedDate.getDate() &&
         d.Timestamp.getMonth() === selectedDate.getMonth() &&
         d.Timestamp.getFullYear() === selectedDate.getFullYear()
     );
 
+    // For comparison charts, filter to show only 5pm-midnight
+    if (isComparison) {
+        const startTime = new Date(selectedDate);
+        startTime.setHours(17, 0, 0, 0); // 5 PM
+        const endTime = new Date(selectedDate);
+        endTime.setHours(23, 59, 59, 999); // Midnight
+        
+        dayData = dayData.filter(d => 
+            d.Timestamp >= startTime && d.Timestamp <= endTime
+        );
+    }
 
     const x = d3.scaleTime()
         .domain(d3.extent(dayData, d => d.Timestamp))
         .range([0, width]);
-
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(dayData, d => d['Dexcom GL']) * 1.2])
@@ -450,14 +482,24 @@ function createGlucoseChart(mealInfo) {
         .attr('fill', '#90EE90')  // Light green color
         .attr('opacity', 0.3);  // Make it semi-transparent
 
-    // Add x-axis
-    svg.append('g')
-        .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(x))
-        .selectAll('text')
-        .style('text-anchor', 'middle')
-        .style('font-size', '12px');
-
+    // Add x-axis with different formatting for comparison
+    if (isComparison) {
+        svg.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x)
+                .ticks(d3.timeHour.every(1))
+                .tickFormat(d3.timeFormat('%I %p')))
+            .selectAll('text')
+            .style('text-anchor', 'middle')
+            .style('font-size', '12px');
+    } else {
+        svg.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .selectAll('text')
+            .style('text-anchor', 'middle')
+            .style('font-size', '12px');
+    }
 
     // Add y-axis
     svg.append('g')
@@ -465,12 +507,10 @@ function createGlucoseChart(mealInfo) {
         .selectAll('text')
         .style('font-size', '12px');
 
-
     // Add line
     const line = d3.line()
         .x(d => x(d.Timestamp))
         .y(d => y(d['Dexcom GL']));
-
 
     svg.append('path')
         .datum(dayData)
@@ -478,7 +518,6 @@ function createGlucoseChart(mealInfo) {
         .attr('stroke', '#28a745')
         .attr('stroke-width', 2)
         .attr('d', line);
-
 
     // Add meal annotations
     const meals = dayData.filter(d => d['Meal Type']);
@@ -495,7 +534,6 @@ function createGlucoseChart(mealInfo) {
                 .attr('stroke-dasharray', '4,4')
                 .style('opacity', 0.7);
 
-
             svg.append('text')
                 .attr('x', x(meal.Timestamp))
                 .attr('y', 15)
@@ -505,7 +543,6 @@ function createGlucoseChart(mealInfo) {
                 .text(mealType.charAt(0).toUpperCase() + mealType.slice(1));
         }
     });
-
 
     // Add brushing (same as before)
     const brush = d3.brushX()
@@ -533,11 +570,9 @@ function createGlucoseChart(mealInfo) {
             setTimeout(() => tooltip.remove(), 2000);
         });
 
-
     svg.append('g')
         .attr('class', 'brush')
         .call(brush);
-
 
     // Add hover line
     const hoverLine = svg.append('line')
@@ -547,10 +582,8 @@ function createGlucoseChart(mealInfo) {
         .attr('stroke-dasharray', '4,4')
         .style('display', 'none');
 
-
     // Tooltip image element
     const tooltipImg = d3.select("#tooltip-img");
-
 
     // Hover interaction
     svg.append('rect')
@@ -609,23 +642,36 @@ function createGlucoseChart(mealInfo) {
                 `);
         });
 
+    // Add title with different formatting for comparison
+    if (isComparison) {
+        const character = containerId.includes('1') ? comparisonData.character1 : comparisonData.character2;
+        const characterName = character === 'jack' ? "Jack's" : "Jill's";
+        svg.append('text')
+            .attr('x', width / 2)
+            .attr('y', -margin.top / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '16px')
+            .text(`${characterName} Glucose Levels Around Dinner`);
+    } else {
+        svg.append('text')
+            .attr('x', width / 2)
+            .attr('y', -margin.top / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '16px')
+            .text(`${selectedCharacter === 'jack' ? "Jack's" : "Jill's"} Glucose Levels Throughout the Day`);
+    }
 
-    svg.append('text')
-        .attr('x', width / 2)
-        .attr('y', -margin.top / 2)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '16px')
-        .text(`${selectedCharacter === 'jack' ? "Jack's" : "Jill's"} Glucose Levels Throughout the Day`);
-
-    // Add warning annotation
-    svg.append('text')
-        .attr('x', width - 20)
-        .attr('y', 50)
-        .attr('text-anchor', 'end')
-        .style('font-size', '14px')
-        .style('font-weight', 'bold')
-        .style('fill', '#dc3545')  // Red color for warning
-        .text('Avoid Glucose Spikes!');
+    // Only add warning annotation for main view
+    if (!isComparison) {
+        svg.append('text')
+            .attr('x', width - 20)
+            .attr('y', 50)
+            .attr('text-anchor', 'end')
+            .style('font-size', '14px')
+            .style('font-weight', 'bold')
+            .style('fill', '#dc3545')
+            .text('Avoid Glucose Spikes!');
+    }
 
     // Add x-axis label
     svg.append('text')
@@ -646,45 +692,47 @@ function createGlucoseChart(mealInfo) {
         .style('font-weight', 'bold')
         .text('Glucose Levels (mg/dL)');
 
-    // Add legend for ideal glucose range
-    const glucoseLegend = svg.append('g')
-        .attr('class', 'glucose-legend')
-        .attr('transform', `translate(${width - 220}, ${height - 20})`);
+    // Only add legend for main view
+    if (!isComparison) {
+        let glucoseLegend;
+        glucoseLegend = svg.append('g')
+            .attr('class', 'glucose-legend')
+            .attr('transform', `translate(${width - 220}, ${height - 20})`);
 
-    glucoseLegend.append('rect')
-        .attr('width', 15)
-        .attr('height', 15)
-        .attr('fill', '#90EE90')
-        .attr('opacity', 0.3);
+        glucoseLegend.append('rect')
+            .attr('width', 15)
+            .attr('height', 15)
+            .attr('fill', '#90EE90')
+            .attr('opacity', 0.3);
 
-    glucoseLegend.append('text')
-        .attr('x', 20)
-        .attr('y', 12)
-        .style('font-size', '12px')
-        .text('Ideal Glucose Range (70-140 mg/dL)');
+        glucoseLegend.append('text')
+            .attr('x', 20)
+            .attr('y', 12)
+            .style('font-size', '12px')
+            .text('Ideal Glucose Range (70-140 mg/dL)');
+    }
 
-    // Takeaway box
-    const takeawayContainer = container.append('div')
-        .style('margin-left', '20px')
-        .style('width', '300px')
-        .style('font-size', '14px')
-        .style('line-height', '1.5')
-        .style('padding', '20px')
-        .style('background-color', '#f8f9fa')
-        .style('border-radius', '5px')
-        .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
+    // Only add takeaway box for main view
+    if (!isComparison) {
+        const takeawayContainer = container.append('div')
+            .style('margin-left', '20px')
+            .style('width', '300px')
+            .style('font-size', '14px')
+            .style('line-height', '1.5')
+            .style('padding', '20px')
+            .style('background-color', '#f8f9fa')
+            .style('border-radius', '5px')
+            .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
 
+        takeawayContainer.append('div')
+            .style('font-weight', 'bold')
+            .style('margin-bottom', '10px')
+            .text('Health Implications:');
 
-    takeawayContainer.append('div')
-        .style('font-weight', 'bold')
-        .style('margin-bottom', '10px')
-        .text('Health Implications:');
-
-
-    takeawayContainer.append('div')
-        .text('Rollercoaster drops are fun, but Glu-coaster drops are not. You should strive to meet the aforementioned NIH recommendations to live healthily and avoid glucose spikes — repeated sharp rises in blood sugar levels that can strain your ability to regulate insulin. Over time, this can lead to insulin resistance, a key early indicator of type 2 diabetes. In the long term, frequent glucose spikes may contribute to heart problems, kidney damage, impaired eyesight, and nerve conditions like neuropathy, where sensation is lost in the fingers and toes.');
+        takeawayContainer.append('div')
+            .text('Rollercoaster drops are fun, but Glu-coaster drops are not. You should strive to meet the aforementioned NIH recommendations to live healthily and avoid glucose spikes — repeated sharp rises in blood sugar levels that can strain your ability to regulate insulin. Over time, this can lead to insulin resistance, a key early indicator of type 2 diabetes. In the long term, frequent glucose spikes may contribute to heart problems, kidney damage, impaired eyesight, and nerve conditions like neuropathy, where sensation is lost in the fingers and toes.');
+    }
 }
-
 
 // Helper function to get baseline values
 function getBaseline(nutrient) {
@@ -706,6 +754,30 @@ document.getElementById('try-again').addEventListener('click', () => {
     document.getElementById('glucose-chart').classList.add('hidden');
     document.getElementById('glucose-button').classList.add('hidden');
     document.getElementById('conclusion').classList.add('hidden');
+    document.getElementById('comparison-section').classList.add('hidden');
+    
+    // Reset comparison dropdowns
+    document.getElementById('character1').value = '';
+    document.getElementById('character2').value = '';
+    document.getElementById('meal1').value = '';
+    document.getElementById('meal2').value = '';
+    
+    // Clear comparison charts
+    document.getElementById('nutrition-bars-1').innerHTML = '';
+    document.getElementById('nutrition-bars-2').innerHTML = '';
+    document.getElementById('glucose-line-1').innerHTML = '';
+    document.getElementById('glucose-line-2').innerHTML = '';
+    
+    // Reset comparison data
+    comparisonData = {
+        character1: null,
+        character2: null,
+        meal1: null,
+        meal2: null,
+        data1: null,
+        data2: null
+    };
+    
     // Hide all scroll indicators
     document.getElementById('scroll-indicator-character').classList.add('hidden');
     document.getElementById('scroll-indicator-nutrition').classList.add('hidden');
@@ -744,15 +816,83 @@ document.getElementById('glucose-button').addEventListener('click', () => {
 
 // Add event listener for see takeaways button
 document.getElementById('see-takeaways').addEventListener('click', () => {
+    document.getElementById('comparison-section').classList.remove('hidden');
     document.getElementById('conclusion').classList.remove('hidden');
     document.getElementById('see-takeaways').classList.add('hidden');
     
-    // Start the conclusion animations
-    animateConclusion();
-    
-    // Scroll to conclusion
-    document.getElementById('conclusion').scrollIntoView({ behavior: 'smooth' });
+    // Scroll to comparison section
+    document.getElementById('comparison-section').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('scroll-indicator-comparison').classList.remove('hidden');
 });
+
+// Set up scroll-triggered animations for conclusion
+const conclusionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in');
+            // Once the element is animated, we can stop observing it
+            conclusionObserver.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.2, // Trigger when 20% of the element is visible
+    rootMargin: '0px 0px -50px 0px' // Start animation slightly before the element comes into view
+});
+
+// Observe all conclusion elements
+document.querySelectorAll('#conclusion p, #conclusion h3').forEach(element => {
+    conclusionObserver.observe(element);
+});
+
+// Handle character selection in comparison
+document.getElementById('character1').addEventListener('change', async function() {
+    comparisonData.character1 = this.value;
+    if (this.value) {
+        comparisonData.data1 = await loadData(this.value);
+        updateMealDropdown('meal1', comparisonData.data1);
+    }
+});
+
+document.getElementById('character2').addEventListener('change', async function() {
+    comparisonData.character2 = this.value;
+    if (this.value) {
+        comparisonData.data2 = await loadData(this.value);
+        updateMealDropdown('meal2', comparisonData.data2);
+    }
+});
+
+// Handle meal selection in comparison
+document.getElementById('meal1').addEventListener('change', function() {
+    comparisonData.meal1 = this.value;
+    if (this.value && comparisonData.data1) {
+        const mealInfo = comparisonData.data1.find(d => d.Meal === this.value);
+        createNutritionChart(mealInfo, 'nutrition-bars-1');
+        createGlucoseChart(mealInfo, 'glucose-line-1', comparisonData.data1);
+    }
+});
+
+document.getElementById('meal2').addEventListener('change', function() {
+    comparisonData.meal2 = this.value;
+    if (this.value && comparisonData.data2) {
+        const mealInfo = comparisonData.data2.find(d => d.Meal === this.value);
+        createNutritionChart(mealInfo, 'nutrition-bars-2');
+        createGlucoseChart(mealInfo, 'glucose-line-2', comparisonData.data2);
+    }
+});
+
+// Update meal dropdown options
+function updateMealDropdown(dropdownId, data) {
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.innerHTML = '<option value="">Select Meal</option>';
+    
+    const uniqueMeals = [...new Set(data.map(d => d.Meal))].filter(Boolean);
+    uniqueMeals.forEach(meal => {
+        const option = document.createElement('option');
+        option.value = meal;
+        option.textContent = meal.replace(/[^\w\s]/g, '').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+        dropdown.appendChild(option);
+    });
+}
 
 document.getElementById('watch-video-button').addEventListener('click', () => {
     window.open('https://youtu.be/B_NPllGhXpw', '_blank');

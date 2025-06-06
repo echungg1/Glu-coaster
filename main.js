@@ -714,23 +714,45 @@ document.getElementById('try-again').addEventListener('click', () => {
     selectedMeal = null;
 });
 
+// Function to animate conclusion elements
+function animateConclusion() {
+    const conclusionElements = document.querySelectorAll('#conclusion p, #conclusion h3');
+    let delay = 0;
+    const delayBetweenElements = 800; // 800ms between each element
+
+    conclusionElements.forEach(element => {
+        setTimeout(() => {
+            element.classList.add('fade-in');
+        }, delay);
+        delay += delayBetweenElements;
+    });
+}
+
 // Add event listener for glucose button
 document.getElementById('glucose-button').addEventListener('click', () => {
     const mealInfo = mealData.find(d => d.Meal === selectedMeal);
     createGlucoseChart(mealInfo);
     document.getElementById('glucose-chart').classList.remove('hidden');
-    document.getElementById('conclusion').classList.remove('hidden');
+    document.getElementById('see-takeaways').classList.remove('hidden');
 
     const scrollGlucose = document.getElementById('scroll-indicator-glucose');
     scrollGlucose.classList.remove('hidden');
 
     // Automatically scroll
     document.getElementById('glucose-chart').scrollIntoView({ behavior: 'smooth' });
+});
 
-
-    // Uncomment if we want it to disappear after 5 seconds
-    // setTimeout(() => scrollGlucose.classList.add('hidden'), 5000);
-}); 
+// Add event listener for see takeaways button
+document.getElementById('see-takeaways').addEventListener('click', () => {
+    document.getElementById('conclusion').classList.remove('hidden');
+    document.getElementById('see-takeaways').classList.add('hidden');
+    
+    // Start the conclusion animations
+    animateConclusion();
+    
+    // Scroll to conclusion
+    document.getElementById('conclusion').scrollIntoView({ behavior: 'smooth' });
+});
 
 document.getElementById('watch-video-button').addEventListener('click', () => {
     window.open('https://youtu.be/B_NPllGhXpw', '_blank');

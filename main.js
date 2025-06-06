@@ -895,6 +895,6 @@ function updateMealDropdown(dropdownId, data) {
 }
 
 document.getElementById('watch-video-button').addEventListener('click', () => {
-    window.open('https://youtu.be/B_NPllGhXpw', '_blank');
+    window.open('https://youtu.be/XHZikXvLbKc', '_blank');
   });
   
